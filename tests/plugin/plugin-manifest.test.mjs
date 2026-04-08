@@ -39,3 +39,16 @@ test('marketplace manifest points at the local plugin folder', () => {
   assert.equal(pluginEntry.source, './')
   assert.equal(pluginEntry.name, 'nuxt-vuetify-skills')
 })
+
+test('README documents plugin installation and command flow', () => {
+  const readme = readFileSync(resolve(root, 'README.md'), 'utf8')
+
+  assert.match(readme, /nuxt-vuetify-skills/)
+  assert.match(readme, /\/think/)
+  assert.match(readme, /\/plan/)
+  assert.match(readme, /\/execute/)
+  assert.match(readme, /\/catalog/)
+  assert.match(readme, /\/audit/)
+  assert.match(readme, /\/test/)
+  assert.equal(existsSync(resolve(root, 'LICENSE')), true)
+})
