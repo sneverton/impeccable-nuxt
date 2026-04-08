@@ -291,9 +291,7 @@ validationErrors.push(...duplicateNameErrors)
 
 if (validationErrors.length > 0) {
   console.log(validationErrors.join('\n'))
-  if (validateOnly) {
-    process.exit(1)
-  }
+  process.exit(1)
 }
 
 const components = validatedComponents
@@ -303,7 +301,7 @@ const components = validatedComponents
 
 if (validateOnly) {
   console.log(`Validated ${collected.length} component files`)
-  process.exit(validationErrors.length === 0 ? 0 : 1)
+  process.exit(0)
 }
 
 const aggregate = {

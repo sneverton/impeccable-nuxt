@@ -8,9 +8,13 @@ import { spawnSync } from 'node:child_process'
 const root = resolve(import.meta.dirname, '..', '..')
 const fixtureRoot = resolve(root, 'tests/fixtures/catalog')
 
-function withFixtureProject(callback) {
+function withFixtureProject(callback, { includeBroken = false } = {}) {
   const projectRoot = mkdtempSync(resolve(tmpdir(), 'nuxt-vuetify-catalog-'))
   cpSync(fixtureRoot, projectRoot, { recursive: true })
+
+  if (!includeBroken) {
+    rmSync(resolve(projectRoot, 'components/broken'), { recursive: true, force: true })
+  }
 
   try {
     callback(projectRoot)
@@ -59,7 +63,7 @@ test('catalog validate mode reports broken fixtures without writing output', () 
     assert.match(result.stdout, /Missing <catalog lang="json"> block/)
     assert.match(result.stdout, /Broken related reference: GhostCard/)
     assert.match(result.stdout, /Field "related" must be a string array/)
-  })
+  }, { includeBroken: true })
 })
 
 test('catalog domain filter emits only the requested domain', () => {
