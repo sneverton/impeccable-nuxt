@@ -84,5 +84,5 @@ test('catalog domain filter emits only the requested domain', () => {
       aggregate.components.map((component) => component.name),
       ['ProjectStatusBadge'],
     )
-  })
+  }, { includeBroken: true })
 })

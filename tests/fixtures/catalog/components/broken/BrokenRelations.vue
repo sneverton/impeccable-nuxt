@@ -2,7 +2,7 @@
 {
   "title": "Broken Relations",
   "category": "display",
-  "domain": "projects",
+  "domain": "ops",
   "tags": ["broken"],
   "purpose": "Provides a broken related reference for validation coverage.",
   "useWhen": "Never; this fixture exists only for tests.",

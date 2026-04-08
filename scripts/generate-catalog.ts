@@ -258,11 +258,17 @@ const collected = componentFiles.map((filePath) => {
   }
 })
 
+const scopedCollected = validateOnly || !domainFilter
+  ? collected
+  : collected.filter(
+      (item): item is OutputComponent => 'name' in item && item.catalog.domain === domainFilter,
+    )
+
 const componentNames = new Set(
   collected.filter((item): item is OutputComponent => 'name' in item).map((item) => item.name),
 )
 
-const validationErrors = collected.flatMap((item) => {
+const validationErrors = scopedCollected.flatMap((item) => {
   if ('error' in item) {
     return [item.error]
   }
@@ -270,7 +276,7 @@ const validationErrors = collected.flatMap((item) => {
   return validateCatalog(item.catalog, componentNames, item.file)
 })
 
-const validatedComponents = collected.filter((item): item is OutputComponent => {
+const validatedComponents = scopedCollected.filter((item): item is OutputComponent => {
   if ('error' in item) {
     return false
   }
