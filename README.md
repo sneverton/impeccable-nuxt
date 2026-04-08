@@ -157,11 +157,6 @@ cp -r dist/gemini/.gemini your-project/
 >
 > [Learn more about Gemini CLI skills](https://geminicli.com/docs/cli/skills/)
 
-**Codex CLI:**
-```bash
-cp -r dist/codex/.codex/* ~/.codex/
-```
-
 **Trae:**
 ```bash
 # Trae China (domestic version)
@@ -204,8 +199,6 @@ Most commands accept an optional argument to focus on a specific area:
 /polish checkout-form
 ```
 
-**Note:** Codex CLI uses a different syntax: `/prompts:audit`, `/prompts:polish`, etc.
-
 ## Supported Tools
 
 - [Cursor](https://cursor.com)
@@ -213,7 +206,6 @@ Most commands accept an optional argument to focus on a specific area:
 - [OpenCode](https://opencode.ai)
 - [Pi](https://pi.dev)
 - [Gemini CLI](https://github.com/google-gemini/gemini-cli)
-- [Codex CLI](https://github.com/openai/codex)
 - [VS Code Copilot](https://code.visualstudio.com)
 - [Kiro](https://kiro.dev)
 - [Trae](https://trae.ai)
