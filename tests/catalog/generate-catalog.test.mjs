@@ -58,6 +58,7 @@ test('catalog validate mode reports broken fixtures without writing output', () 
     assert.equal(result.status, 1)
     assert.match(result.stdout, /Missing <catalog lang="json"> block/)
     assert.match(result.stdout, /Broken related reference: GhostCard/)
+    assert.match(result.stdout, /Field "related" must be a string array/)
   })
 })
 

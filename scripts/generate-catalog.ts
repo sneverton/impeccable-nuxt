@@ -1,4 +1,4 @@
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { basename, dirname, join, relative, resolve } from 'node:path'
 import fg from 'fast-glob'
 import { parse } from '@vue/compiler-sfc'
@@ -42,6 +42,8 @@ type OutputComponent = {
     exposed: Array<{ name: string }>
   }
 }
+
+type CatalogValidationTarget = Partial<CatalogEntry> & Record<string, unknown>
 
 const projectRoot = resolve(process.env.CATALOG_ROOT ?? process.cwd())
 const componentFiles = fg.sync('components/**/*.vue', { cwd: projectRoot, absolute: true })
@@ -153,7 +155,11 @@ function collectComponent(filePath: string): OutputComponent {
   }
 }
 
-function validateCatalog(entry: CatalogEntry, componentNames: Set<string>, file: string): string[] {
+function isStringArray(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every((item) => typeof item === 'string')
+}
+
+function validateCatalog(entry: CatalogValidationTarget, componentNames: Set<string>, file: string): string[] {
   const errors: string[] = []
 
   const requiredKeys: Array<keyof CatalogEntry> = [
@@ -191,14 +197,48 @@ function validateCatalog(entry: CatalogEntry, componentNames: Set<string>, file:
     errors.push(`Invalid category "${entry.category}" in ${file}`)
   }
 
+  if (entry.domain !== null && typeof entry.domain !== 'string') {
+    errors.push(`Field "domain" must be a string or null in ${file}`)
+  }
+
+  if (!isStringArray(entry.tags)) {
+    errors.push(`Field "tags" must be a string array in ${file}`)
+  }
+
+  const allowedStatuses = new Set<CatalogStatus>(['draft', 'stable', 'deprecated'])
+
+  if (!allowedStatuses.has(entry.status as CatalogStatus)) {
+    errors.push(`Invalid status "${entry.status}" in ${file}`)
+  }
+
+  if (!isStringArray(entry.related)) {
+    errors.push(`Field "related" must be a string array in ${file}`)
+  }
+
+  if (!isStringArray(entry.usedBy)) {
+    errors.push(`Field "usedBy" must be a string array in ${file}`)
+  }
+
+  if (typeof entry.replaces !== 'string' && entry.replaces !== null) {
+    errors.push(`Field "replaces" must be a string or null in ${file}`)
+  }
+
+  if (!isStringArray(entry.related)) {
+    return errors
+  }
+
   for (const related of entry.related) {
     if (!componentNames.has(related)) {
       errors.push(`Broken related reference: ${related} in ${file}`)
     }
   }
 
-  if (entry.replaces && !componentNames.has(entry.replaces)) {
+  if (typeof entry.replaces === 'string' && !componentNames.has(entry.replaces)) {
     errors.push(`Broken replaces reference: ${entry.replaces} in ${file}`)
+  }
+
+  if (!isStringArray(entry.usedBy)) {
+    return errors
   }
 
   for (const usedBy of entry.usedBy) {
@@ -238,6 +278,17 @@ const validatedComponents = collected.filter((item): item is OutputComponent => 
   return validateCatalog(item.catalog, componentNames, item.file).length === 0
 })
 
+const componentNameCounts = validatedComponents.reduce((counts, component) => {
+  counts.set(component.name, (counts.get(component.name) ?? 0) + 1)
+  return counts
+}, new Map<string, number>())
+
+const duplicateNameErrors = [...componentNameCounts.entries()]
+  .filter(([, count]) => count > 1)
+  .map(([name]) => `Duplicate component meta output name: ${name}`)
+
+validationErrors.push(...duplicateNameErrors)
+
 if (validationErrors.length > 0) {
   console.log(validationErrors.join('\n'))
   if (validateOnly) {
@@ -246,6 +297,7 @@ if (validationErrors.length > 0) {
 }
 
 const components = validatedComponents
+  .filter((item) => (componentNameCounts.get(item.name) ?? 0) === 1)
   .filter((item) => (domainFilter ? item.catalog.domain === domainFilter : true))
   .sort((a, b) => b.name.localeCompare(a.name))
 
@@ -258,6 +310,10 @@ const aggregate = {
   generated: new Date().toISOString(),
   version: '1.0.0',
   components,
+}
+
+for (const outputFile of fg.sync('components/**/*.meta.json', { cwd: projectRoot, absolute: true })) {
+  rmSync(outputFile, { force: true })
 }
 
 writeFileSync(
