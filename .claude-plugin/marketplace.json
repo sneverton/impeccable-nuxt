@@ -1,9 +1,17 @@
 {
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "nuxt-vuetify-skills",
-  "source": {
-    "source": "local",
-    "path": "./"
+  "metadata": {
+    "description": "Nuxt 4 + Vuetify 3 workflow skills for Claude Code."
   },
-  "entry": ".claude-plugin/plugin.json",
-  "category": "Frontend"
+  "plugins": [
+    {
+      "name": "nuxt-vuetify-skills",
+      "description": "Nuxt 4 + Vuetify 3 workflow skills for Claude Code",
+      "version": "0.1.0",
+      "source": "./",
+      "category": "frontend",
+      "tags": ["nuxt", "vuetify", "vue", "frontend", "skills"]
+    }
+  ]
 }

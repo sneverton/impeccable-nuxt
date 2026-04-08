@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { existsSync, readFileSync } from 'node:fs'
+import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -12,26 +12,25 @@ function readJson(relativePath) {
 
 test('plugin manifest registers the six shipped skills', () => {
   const plugin = readJson('.claude-plugin/plugin.json')
+  const skillsRoot = resolve(root, plugin.skills)
+  const shippedSkills = readdirSync(skillsRoot, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
+    .filter((name) => ['think', 'plan', 'execute', 'catalog', 'audit', 'test'].includes(name))
+    .sort()
 
   assert.equal(plugin.name, 'nuxt-vuetify-skills')
-  assert.deepEqual(
-    plugin.skills.map((skill) => skill.name),
-    ['think', 'plan', 'execute', 'catalog', 'audit', 'test'],
-  )
-
-  for (const skill of plugin.skills) {
-    assert.equal(
-      existsSync(resolve(root, skill.path)),
-      true,
-      `Missing advertised skill file: ${skill.path}`,
-    )
-  }
+  assert.equal(plugin.skills, './.claude/skills')
+  assert.deepEqual(shippedSkills, ['audit', 'catalog', 'execute', 'plan', 'test', 'think'])
+  assert.equal(existsSync(skillsRoot), true)
 })
 
 test('marketplace manifest points at the local plugin folder', () => {
   const marketplace = readJson('.claude-plugin/marketplace.json')
+  const pluginEntry = marketplace.plugins[0]
 
   assert.equal(marketplace.name, 'nuxt-vuetify-skills')
-  assert.equal(marketplace.source.path, './')
-  assert.equal(marketplace.entry, '.claude-plugin/plugin.json')
+  assert.equal(marketplace.$schema, 'https://anthropic.com/claude-code/marketplace.schema.json')
+  assert.equal(pluginEntry.source, './')
+  assert.equal(pluginEntry.name, 'nuxt-vuetify-skills')
 })
