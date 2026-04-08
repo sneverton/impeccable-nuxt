@@ -13,15 +13,14 @@ Claude Code plugin for Nuxt 4 + Vuetify 3 projects.
 
 ## Installation
 
-Copy the plugin manifests and skill tree into the target project:
+Keep the plugin files together in the target project:
 
-```bash
-cp -r .claude-plugin /path/to/your-project/
-mkdir -p /path/to/your-project/.claude
-cp -r .claude/skills-nuxt-vuetify /path/to/your-project/.claude/
-```
+- `.claude-plugin/`
+- `.claude/skills-nuxt-vuetify/`
+- `scripts/generate-catalog.ts`
+- `tsconfig.json`
 
-Then install the package dependencies:
+Then install the workspace dependencies:
 
 ```bash
 npm install
@@ -29,27 +28,34 @@ npm install
 
 ## Catalog workflow
 
-Projects get the best results when reusable components include `<catalog lang="json">` blocks and the catalog stays current:
+Projects get the best results when reusable components include a `<catalog lang="json">` block and the catalog stays up to date:
 
 ```bash
 npm run catalog
-npm run catalog -- projects
 npm run catalog:validate
 ```
 
-`npm run catalog` writes `components.meta.json` plus `components/*.meta.json` in the target project root. Use `CATALOG_ROOT=/path/to/project` when validating or generating metadata for another workspace.
+`npm run catalog` writes `components.meta.json` plus per-component `components/*.meta.json` files in the target project root.
 
-## Daily command flow
+## Recommended command flow
 
-The recommended daily flow is `/think` -> `/plan` -> `/execute`, followed by `/catalog` and `/test`.
+The normal working loop is:
+
+1. `/think`
+2. `/plan`
+3. `/execute`
+4. `/catalog`
+5. `/test`
+
+Use `/audit` whenever you need a non-editing review of structure, catalog hygiene, Vuetify usage, or CSS quality.
 
 ## Local verification
+
+Run the full smoke suite with:
 
 ```bash
 npm test
 ```
-
-This runs the manifest smoke tests, skill-tree checks, and fixture-driven catalog coverage.
 
 ## License
 
