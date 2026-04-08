@@ -1,0 +1,4 @@
+# TODO
+
+- Marketplace remoto do Claude Code: separar a distribuicao em dois repositorios, mantendo este como plugin e criando um repo dedicado de marketplace no estilo `obra/superpowers-marketplace`. O fluxo alvo deve ser ` /plugin marketplace add <org>/<marketplace-repo> ` seguido de ` /plugin install nuxt-vuetify-skills@<marketplace-name> `. Antes de implementar, revisar a documentacao oficial em `https://code.claude.com/docs/en/plugin-marketplaces` e definir nome publico, owner metadata, source GitHub e estrategia de versionamento.
+- Extrair o gerador generico de catalogo para um pacote publicado no npm. Objetivo: a skill `/catalog` usar primeiro o workflow nativo do projeto e, quando ele nao existir, instalar ou referenciar um pacote versionado dedicado para gerar `components.meta.json` e `.generated/component-catalog/components.meta.json`.
