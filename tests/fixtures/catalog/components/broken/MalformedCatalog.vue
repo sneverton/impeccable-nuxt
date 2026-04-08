@@ -1,11 +1,11 @@
 <catalog lang="json">
 {
-  "title": "Malformed Catalog",
+  "title": 123,
   "category": "display",
   "domain": 7,
   "tags": "broken",
   "purpose": "Exercises malformed catalog validation.",
-  "useWhen": "Never.",
+  "useWhen": {},
   "avoidWhen": "Always.",
   "status": "invalid",
   "related": "GhostCard",

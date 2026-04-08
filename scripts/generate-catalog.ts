@@ -182,6 +182,19 @@ function validateCatalog(entry: CatalogValidationTarget, componentNames: Set<str
     }
   }
 
+  const requiredStringFields: Array<keyof Pick<CatalogEntry, 'title' | 'purpose' | 'useWhen' | 'avoidWhen'>> = [
+    'title',
+    'purpose',
+    'useWhen',
+    'avoidWhen',
+  ]
+
+  for (const field of requiredStringFields) {
+    if (typeof entry[field] !== 'string' || entry[field].trim() === '') {
+      errors.push(`Field "${field}" must be a non-empty string in ${file}`)
+    }
+  }
+
   const allowedCategories = new Set<CatalogCategory>([
     'app',
     'display',
@@ -294,6 +307,10 @@ const duplicateNameErrors = [...componentNameCounts.entries()]
   .map(([name]) => `Duplicate component meta output name: ${name}`)
 
 validationErrors.push(...duplicateNameErrors)
+
+if (domainFilter && !validateOnly && validatedComponents.length === 0) {
+  validationErrors.push(`Unknown domain filter: ${domainFilter}`)
+}
 
 if (validationErrors.length > 0) {
   console.log(validationErrors.join('\n'))

@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdtempSync, cpSync, readFileSync, rmSync } from 'node:fs'
+import { mkdtempSync, cpSync, existsSync, readFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { resolve } from 'node:path'
 import { spawnSync } from 'node:child_process'
@@ -62,6 +62,8 @@ test('catalog validate mode reports broken fixtures without writing output', () 
     assert.equal(result.status, 1)
     assert.match(result.stdout, /Missing <catalog lang="json"> block/)
     assert.match(result.stdout, /Broken related reference: GhostCard/)
+    assert.match(result.stdout, /Field "title" must be a non-empty string/)
+    assert.match(result.stdout, /Field "useWhen" must be a non-empty string/)
     assert.match(result.stdout, /Field "related" must be a string array/)
   }, { includeBroken: true })
 })
@@ -85,4 +87,18 @@ test('catalog domain filter emits only the requested domain', () => {
       ['ProjectStatusBadge'],
     )
   }, { includeBroken: true })
+})
+
+test('catalog domain filter fails cleanly for an unknown domain', () => {
+  withFixtureProject((projectRoot) => {
+    const result = spawnSync('npm', ['run', 'catalog', '--', 'missing-domain'], {
+      cwd: root,
+      env: { ...process.env, CATALOG_ROOT: projectRoot },
+      encoding: 'utf8',
+    })
+
+    assert.equal(result.status, 1)
+    assert.match(result.stdout, /Unknown domain filter: missing-domain/)
+    assert.equal(existsSync(resolve(projectRoot, 'components.meta.json')), false)
+  })
 })
