@@ -581,28 +581,20 @@ name: frontend-design
 describe('replacePlaceholders', () => {
   test('should replace {{model}} with provider-specific value', () => {
     expect(replacePlaceholders('Ask {{model}} for help.', 'claude-code')).toBe('Ask Claude for help.');
-    expect(replacePlaceholders('Ask {{model}} for help.', 'gemini')).toBe('Ask Gemini for help.');
     expect(replacePlaceholders('Ask {{model}} for help.', 'codex')).toBe('Ask GPT for help.');
-    expect(replacePlaceholders('Ask {{model}} for help.', 'cursor')).toBe('Ask the model for help.');
-    expect(replacePlaceholders('Ask {{model}} for help.', 'agents')).toBe('Ask the model for help.');
-    expect(replacePlaceholders('Ask {{model}} for help.', 'kiro')).toBe('Ask Claude for help.');
   });
 
   test('should replace {{config_file}} with provider-specific value', () => {
     expect(replacePlaceholders('See {{config_file}}.', 'claude-code')).toBe('See CLAUDE.md.');
-    expect(replacePlaceholders('See {{config_file}}.', 'cursor')).toBe('See .cursorrules.');
-    expect(replacePlaceholders('See {{config_file}}.', 'gemini')).toBe('See GEMINI.md.');
     expect(replacePlaceholders('See {{config_file}}.', 'codex')).toBe('See AGENTS.md.');
-    expect(replacePlaceholders('See {{config_file}}.', 'agents')).toBe('See .github/copilot-instructions.md.');
-    expect(replacePlaceholders('See {{config_file}}.', 'kiro')).toBe('See .kiro/settings.json.');
   });
 
   test('should replace {{ask_instruction}} with provider-specific value', () => {
     const result = replacePlaceholders('{{ask_instruction}}', 'claude-code');
     expect(result).toBe('STOP and call the AskUserQuestion tool to clarify.');
 
-    const cursorResult = replacePlaceholders('{{ask_instruction}}', 'cursor');
-    expect(cursorResult).toBe('ask the user directly to clarify what you cannot infer.');
+    const codexResult = replacePlaceholders('{{ask_instruction}}', 'codex');
+    expect(codexResult).toBe('ask the user directly to clarify what you cannot infer.');
   });
 
   test('should replace {{available_commands}} with command list', () => {

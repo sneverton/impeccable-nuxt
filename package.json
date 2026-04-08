@@ -7,11 +7,9 @@
     "motion": "^12.23.26",
     "playwright": "^1.57.0"
   },
-  "description": "Cross-provider design skills and commands for LLM-powered development tools",
+  "description": "Design skills and commands for Claude Code and Codex CLI",
   "keywords": [
-    "cursor",
     "claude",
-    "gemini",
     "codex",
     "design",
     "frontend",
