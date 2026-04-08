@@ -7,13 +7,13 @@ description: Explore Nuxt 4 + Vuetify 3 frontend requests, reuse the catalog whe
 
 ## Purpose
 
-Clarify what to build before implementation. Consult `components.meta.json` when it exists, ask only the minimum useful questions, and challenge weak component boundaries.
+Clarify what to build before implementation. Consult `components.meta.json` when it exists, or `.generated/component-catalog/components.meta.json` when the project ships the slim catalog mirror, ask only the minimum useful questions, and challenge weak component boundaries.
 
 ## Flow
 
-1. Read `components.meta.json` when available.
+1. Read `components.meta.json` when available. Fall back to `.generated/component-catalog/components.meta.json` when the project exposes only the slim catalog.
 2. Classify the request as simple, medium, or complex.
-3. Search for reusable components by `tags`, `category`, `domain`, and `useWhen`.
+3. Search for reusable components by `tags`, `category`, and `domain`. Use `useWhen` only when the rich catalog includes it.
 4. Ask focused follow-up questions only when the request still has material ambiguity.
 5. Produce the structured output below and stop. Do not write code.
 

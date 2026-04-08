@@ -35,7 +35,11 @@ npm run catalog
 npm run catalog:validate
 ```
 
-`npm run catalog` writes `components.meta.json` plus per-component `components/*.meta.json` files in the target project root.
+`npm run catalog` writes:
+
+- `components.meta.json` with the rich semantic and technical metadata
+- `.generated/component-catalog/components.meta.json` with the slim compatibility mirror
+- `components/*.meta.json` for per-component rich metadata
 
 ## Recommended command flow
 

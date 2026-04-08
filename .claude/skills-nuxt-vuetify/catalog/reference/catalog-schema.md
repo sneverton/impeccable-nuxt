@@ -12,7 +12,7 @@ Each Vue SFC may include:
   "purpose": "Displays the lifecycle status of a project.",
   "useWhen": "Use in project lists, cards, and headers.",
   "avoidWhen": "Avoid for generic statuses; use StatusChip instead.",
-  "status": "stable",
+  "status": "experimental",
   "related": ["StatusChip"],
   "replaces": null,
   "usedBy": ["ProjectDetailsPage"]
@@ -21,3 +21,10 @@ Each Vue SFC may include:
 ~~~
 
 Required fields: `title`, `category`, `domain`, `tags`, `purpose`, `useWhen`, `avoidWhen`, `status`, `related`, `replaces`, `usedBy`.
+
+Allowed `status` values: `draft`, `experimental`, `stable`, `deprecated`.
+
+Generated outputs:
+
+- Rich catalog: `components.meta.json`
+- Slim compatibility mirror: `.generated/component-catalog/components.meta.json`

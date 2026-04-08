@@ -12,7 +12,7 @@ Turn an approved design direction into a concrete file tree and execution sequen
 ## Flow
 
 1. Consume the latest think output or a direct request with equivalent detail.
-2. Read `components.meta.json` when the plan references reusable components.
+2. Read `components.meta.json` when the plan references reusable components. Fall back to `.generated/component-catalog/components.meta.json` when the project only ships the slim catalog.
 3. Define the exact file paths, grouped by dependency order.
 4. Mark which files can run in parallel and which must wait.
 5. Present the plan and esperar aprovacao do usuario.

@@ -22,7 +22,12 @@ test('catalog skill files exist and describe validate mode', () => {
 
   const skill = read('.claude/skills-nuxt-vuetify/catalog/SKILL.md')
   assert.match(skill, /\/catalog --validate/)
+  assert.match(skill, /catalog:generate/)
+  assert.match(skill, /catalog:validate/)
+  assert.match(skill, /fallback/)
+  assert.match(skill, /scripts\/generate-catalog\.ts/)
   assert.match(skill, /components\.meta\.json/)
+  assert.match(skill, /\.generated\/component-catalog\/components\.meta\.json/)
 })
 
 test('think and plan skills explain catalog-aware design and execution topology', () => {
@@ -41,8 +46,11 @@ test('think and plan skills explain catalog-aware design and execution topology'
   const plan = read('.claude/skills-nuxt-vuetify/plan/SKILL.md')
 
   assert.match(think, /components\.meta\.json/)
+  assert.match(think, /\.generated\/component-catalog\/components\.meta\.json/)
+  assert.match(think, /tags`, `category`, and `domain/)
   assert.match(think, /## Think Output/)
   assert.match(plan, /## Grupos de Execucao/)
+  assert.match(plan, /\.generated\/component-catalog\/components\.meta\.json/)
   assert.match(plan, /esperar aprovacao/)
 })
 

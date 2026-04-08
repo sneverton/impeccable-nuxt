@@ -42,12 +42,27 @@ test('catalog command generates aggregate and per-component metadata', () => {
         'utf8',
       ),
     )
+    const compatibilityAggregate = JSON.parse(
+      readFileSync(
+        resolve(projectRoot, '.generated/component-catalog/components.meta.json'),
+        'utf8',
+      ),
+    )
 
     assert.equal(aggregate.components.length, 2)
     assert.equal(aggregate.components[1].name, 'ProjectStatusBadge')
     assert.equal(aggregate.components[1].catalog.domain, 'projects')
     assert.equal(aggregate.components[1].meta.props[0].name, 'status')
+    assert.equal(aggregate.components[0].catalog.status, 'experimental')
     assert.equal(perComponent.catalog.category, 'display')
+    assert.equal(compatibilityAggregate.totalComponents, 2)
+    assert.equal(compatibilityAggregate.components[0].filePath, 'components/shared/StatusChip.vue')
+    assert.equal(compatibilityAggregate.components[0].status, 'experimental')
+    assert.deepEqual(
+      compatibilityAggregate.indexes.byCategory.display,
+      ['ProjectStatusBadge', 'StatusChip'],
+    )
+    assert.deepEqual(compatibilityAggregate.indexes.byDomain.projects, ['ProjectStatusBadge'])
   })
 })
 
@@ -132,6 +147,10 @@ test('catalog removes stale generated metadata after a failed full generation ru
 
     assert.equal(secondRun.status, 1)
     assert.equal(existsSync(resolve(projectRoot, 'components.meta.json')), false)
+    assert.equal(
+      existsSync(resolve(projectRoot, '.generated/component-catalog/components.meta.json')),
+      false,
+    )
     assert.equal(
       existsSync(resolve(projectRoot, 'components/ProjectStatusBadge.meta.json')),
       false,

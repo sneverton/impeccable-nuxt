@@ -15,7 +15,7 @@ type CatalogCategory =
   | 'section'
   | 'domain'
 
-type CatalogStatus = 'draft' | 'stable' | 'deprecated'
+type CatalogStatus = 'draft' | 'stable' | 'deprecated' | 'experimental'
 
 type CatalogEntry = {
   title: string
@@ -43,9 +43,24 @@ type OutputComponent = {
   }
 }
 
+type CompatibilityComponent = {
+  name: string
+  filePath: string
+  category: CatalogCategory
+  domain: string | null
+  status: CatalogStatus
+  tags: string[]
+}
+
 type CatalogValidationTarget = Partial<CatalogEntry> & Record<string, unknown>
 
 const projectRoot = resolve(process.env.CATALOG_ROOT ?? process.cwd())
+const compatibilityOutputFile = join(
+  projectRoot,
+  '.generated',
+  'component-catalog',
+  'components.meta.json',
+)
 const componentFiles = fg.sync('components/**/*.vue', { cwd: projectRoot, absolute: true })
 const checker = createChecker(join(projectRoot, 'tsconfig.json'), { forceUseTs: true })
 const rawArgs = process.argv.slice(2)
@@ -218,7 +233,12 @@ function validateCatalog(entry: CatalogValidationTarget, componentNames: Set<str
     errors.push(`Field "tags" must be a string array in ${file}`)
   }
 
-  const allowedStatuses = new Set<CatalogStatus>(['draft', 'stable', 'deprecated'])
+  const allowedStatuses = new Set<CatalogStatus>([
+    'draft',
+    'stable',
+    'deprecated',
+    'experimental',
+  ])
 
   if (!allowedStatuses.has(entry.status as CatalogStatus)) {
     errors.push(`Invalid status "${entry.status}" in ${file}`)
@@ -323,10 +343,43 @@ if (unknownDomainFilter) {
 
 function removeGeneratedOutputs(): void {
   rmSync(join(projectRoot, 'components.meta.json'), { force: true })
+  rmSync(compatibilityOutputFile, { force: true })
 
   for (const outputFile of fg.sync('components/**/*.meta.json', { cwd: projectRoot, absolute: true })) {
     rmSync(outputFile, { force: true })
   }
+}
+
+function buildIndex(
+  components: CompatibilityComponent[],
+  key: keyof CompatibilityComponent,
+): Record<string, string[]> {
+  const entries = components.reduce((index, component) => {
+    const value = component[key]
+
+    if (Array.isArray(value)) {
+      for (const item of value) {
+        index[item] ??= []
+        index[item].push(component.name)
+      }
+
+      return index
+    }
+
+    if (value === null) {
+      return index
+    }
+
+    index[value] ??= []
+    index[value].push(component.name)
+    return index
+  }, {} as Record<string, string[]>)
+
+  return Object.fromEntries(
+    Object.entries(entries)
+      .sort(([left], [right]) => left.localeCompare(right))
+      .map(([name, members]) => [name, members.sort((left, right) => left.localeCompare(right))]),
+  )
 }
 
 if (validationErrors.length > 0) {
@@ -353,12 +406,37 @@ const aggregate = {
   version: '1.0.0',
   components,
 }
+const compatibilityComponents = components.map((component) => ({
+  name: component.name,
+  filePath: component.file,
+  category: component.catalog.category,
+  domain: component.catalog.domain,
+  status: component.catalog.status,
+  tags: component.catalog.tags,
+}))
+const compatibilityAggregate = {
+  generatedAt: aggregate.generated,
+  version: aggregate.version,
+  totalComponents: compatibilityComponents.length,
+  components: compatibilityComponents,
+  indexes: {
+    byCategory: buildIndex(compatibilityComponents, 'category'),
+    byDomain: buildIndex(compatibilityComponents, 'domain'),
+    byTag: buildIndex(compatibilityComponents, 'tags'),
+    byStatus: buildIndex(compatibilityComponents, 'status'),
+  },
+}
 
 removeGeneratedOutputs()
 
 writeFileSync(
   join(projectRoot, 'components.meta.json'),
   `${JSON.stringify(aggregate, null, 2)}\n`,
+)
+mkdirSync(dirname(compatibilityOutputFile), { recursive: true })
+writeFileSync(
+  compatibilityOutputFile,
+  `${JSON.stringify(compatibilityAggregate, null, 2)}\n`,
 )
 
 for (const component of components) {

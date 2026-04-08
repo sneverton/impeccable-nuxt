@@ -50,5 +50,6 @@ test('README documents plugin installation and command flow', () => {
   assert.match(readme, /\/catalog/)
   assert.match(readme, /\/audit/)
   assert.match(readme, /\/test/)
+  assert.match(readme, /\.generated\/component-catalog\/components\.meta\.json/)
   assert.equal(existsSync(resolve(root, 'LICENSE')), true)
 })
