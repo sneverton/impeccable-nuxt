@@ -22,6 +22,12 @@ test('plugin manifest registers the six shipped skills', () => {
   assert.equal(plugin.skills, './.claude/skills-nuxt-vuetify')
   assert.deepEqual(shippedSkills, ['audit', 'catalog', 'execute', 'plan', 'test', 'think'])
   assert.equal(existsSync(skillsRoot), true)
+
+  for (const skillName of shippedSkills) {
+    const skillFile = resolve(skillsRoot, skillName, 'SKILL.md')
+    assert.equal(existsSync(skillFile), true, `Missing scaffold file: ${skillFile}`)
+    assert.match(readFileSync(skillFile, 'utf8'), /^---\nname: /, `Missing frontmatter in ${skillFile}`)
+  }
 })
 
 test('marketplace manifest points at the local plugin folder', () => {
