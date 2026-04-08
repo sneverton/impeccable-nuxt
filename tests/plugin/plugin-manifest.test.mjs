@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -18,6 +18,14 @@ test('plugin manifest registers the six shipped skills', () => {
     plugin.skills.map((skill) => skill.name),
     ['think', 'plan', 'execute', 'catalog', 'audit', 'test'],
   )
+
+  for (const skill of plugin.skills) {
+    assert.equal(
+      existsSync(resolve(root, skill.path)),
+      true,
+      `Missing advertised skill file: ${skill.path}`,
+    )
+  }
 })
 
 test('marketplace manifest points at the local plugin folder', () => {
