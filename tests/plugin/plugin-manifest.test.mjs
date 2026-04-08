@@ -16,11 +16,10 @@ test('plugin manifest registers the six shipped skills', () => {
   const shippedSkills = readdirSync(skillsRoot, { withFileTypes: true })
     .filter((entry) => entry.isDirectory())
     .map((entry) => entry.name)
-    .filter((name) => ['think', 'plan', 'execute', 'catalog', 'audit', 'test'].includes(name))
     .sort()
 
   assert.equal(plugin.name, 'nuxt-vuetify-skills')
-  assert.equal(plugin.skills, './.claude/skills')
+  assert.equal(plugin.skills, './.claude/skills-nuxt-vuetify')
   assert.deepEqual(shippedSkills, ['audit', 'catalog', 'execute', 'plan', 'test', 'think'])
   assert.equal(existsSync(skillsRoot), true)
 })

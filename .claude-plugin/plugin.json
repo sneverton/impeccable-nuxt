@@ -2,5 +2,5 @@
   "name": "nuxt-vuetify-skills",
   "version": "0.1.0",
   "description": "Nuxt 4 + Vuetify 3 workflow skills for Claude Code",
-  "skills": "./.claude/skills"
+  "skills": "./.claude/skills-nuxt-vuetify"
 }
