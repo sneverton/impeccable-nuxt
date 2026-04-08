@@ -277,6 +277,13 @@ const scopedCollected = validateOnly || !domainFilter
       (item): item is OutputComponent => 'name' in item && item.catalog.domain === domainFilter,
     )
 
+const knownDomains = new Set(
+  collected
+    .filter((item): item is OutputComponent => 'name' in item)
+    .map((item) => item.catalog.domain)
+    .filter((domain): domain is string => typeof domain === 'string' && domain.length > 0),
+)
+
 const componentNames = new Set(
   collected.filter((item): item is OutputComponent => 'name' in item).map((item) => item.name),
 )
@@ -308,11 +315,25 @@ const duplicateNameErrors = [...componentNameCounts.entries()]
 
 validationErrors.push(...duplicateNameErrors)
 
-if (domainFilter && !validateOnly && validatedComponents.length === 0) {
+const unknownDomainFilter = Boolean(domainFilter && !validateOnly && !knownDomains.has(domainFilter))
+
+if (unknownDomainFilter) {
   validationErrors.push(`Unknown domain filter: ${domainFilter}`)
 }
 
+function removeGeneratedOutputs(): void {
+  rmSync(join(projectRoot, 'components.meta.json'), { force: true })
+
+  for (const outputFile of fg.sync('components/**/*.meta.json', { cwd: projectRoot, absolute: true })) {
+    rmSync(outputFile, { force: true })
+  }
+}
+
 if (validationErrors.length > 0) {
+  if (!validateOnly && !unknownDomainFilter) {
+    removeGeneratedOutputs()
+  }
+
   console.log(validationErrors.join('\n'))
   process.exit(1)
 }
@@ -333,9 +354,7 @@ const aggregate = {
   components,
 }
 
-for (const outputFile of fg.sync('components/**/*.meta.json', { cwd: projectRoot, absolute: true })) {
-  rmSync(outputFile, { force: true })
-}
+removeGeneratedOutputs()
 
 writeFileSync(
   join(projectRoot, 'components.meta.json'),

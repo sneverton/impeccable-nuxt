@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdtempSync, cpSync, existsSync, readFileSync, rmSync } from 'node:fs'
+import { mkdtempSync, cpSync, existsSync, mkdirSync, readFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { resolve } from 'node:path'
 import { spawnSync } from 'node:child_process'
@@ -100,5 +100,41 @@ test('catalog domain filter fails cleanly for an unknown domain', () => {
     assert.equal(result.status, 1)
     assert.match(result.stdout, /Unknown domain filter: missing-domain/)
     assert.equal(existsSync(resolve(projectRoot, 'components.meta.json')), false)
+  })
+})
+
+test('catalog removes stale generated metadata after a failed full generation run', () => {
+  withFixtureProject((projectRoot) => {
+    const firstRun = spawnSync('npm', ['run', 'catalog'], {
+      cwd: root,
+      env: { ...process.env, CATALOG_ROOT: projectRoot },
+      encoding: 'utf8',
+    })
+
+    assert.equal(firstRun.status, 0, firstRun.stderr)
+    assert.equal(existsSync(resolve(projectRoot, 'components.meta.json')), true)
+    assert.equal(
+      existsSync(resolve(projectRoot, 'components/ProjectStatusBadge.meta.json')),
+      true,
+    )
+
+    mkdirSync(resolve(projectRoot, 'components/broken'), { recursive: true })
+    cpSync(
+      resolve(fixtureRoot, 'components/broken/MalformedCatalog.vue'),
+      resolve(projectRoot, 'components/broken/MalformedCatalog.vue'),
+    )
+
+    const secondRun = spawnSync('npm', ['run', 'catalog'], {
+      cwd: root,
+      env: { ...process.env, CATALOG_ROOT: projectRoot },
+      encoding: 'utf8',
+    })
+
+    assert.equal(secondRun.status, 1)
+    assert.equal(existsSync(resolve(projectRoot, 'components.meta.json')), false)
+    assert.equal(
+      existsSync(resolve(projectRoot, 'components/ProjectStatusBadge.meta.json')),
+      false,
+    )
   })
 })
