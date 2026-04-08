@@ -199,6 +199,18 @@ Most commands accept an optional argument to focus on a specific area:
 /polish checkout-form
 ```
 
+## Catalog Command
+
+Update component metadata with:
+
+```bash
+npm run catalog
+npm run catalog -- projects
+npm run catalog:validate
+```
+
+`npm run catalog` writes `components.meta.json` and `components/*.meta.json` in the target project root.
+
 ## Supported Tools
 
 - [Cursor](https://cursor.com)

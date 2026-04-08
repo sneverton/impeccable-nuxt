@@ -46,3 +46,38 @@ test('catalog command generates aggregate and per-component metadata', () => {
     assert.equal(perComponent.catalog.category, 'display')
   })
 })
+
+test('catalog validate mode reports broken fixtures without writing output', () => {
+  withFixtureProject((projectRoot) => {
+    const result = spawnSync('npm', ['run', 'catalog:validate'], {
+      cwd: root,
+      env: { ...process.env, CATALOG_ROOT: projectRoot },
+      encoding: 'utf8',
+    })
+
+    assert.equal(result.status, 1)
+    assert.match(result.stdout, /Missing <catalog lang="json"> block/)
+    assert.match(result.stdout, /Broken related reference: GhostCard/)
+  })
+})
+
+test('catalog domain filter emits only the requested domain', () => {
+  withFixtureProject((projectRoot) => {
+    const result = spawnSync('npm', ['run', 'catalog', '--', 'projects'], {
+      cwd: root,
+      env: { ...process.env, CATALOG_ROOT: projectRoot },
+      encoding: 'utf8',
+    })
+
+    assert.equal(result.status, 0, result.stderr)
+
+    const aggregate = JSON.parse(
+      readFileSync(resolve(projectRoot, 'components.meta.json'), 'utf8'),
+    )
+
+    assert.deepEqual(
+      aggregate.components.map((component) => component.name),
+      ['ProjectStatusBadge'],
+    )
+  })
+})

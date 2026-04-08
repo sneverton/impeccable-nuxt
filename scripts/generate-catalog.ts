@@ -46,6 +46,9 @@ type OutputComponent = {
 const projectRoot = resolve(process.env.CATALOG_ROOT ?? process.cwd())
 const componentFiles = fg.sync('components/**/*.vue', { cwd: projectRoot, absolute: true })
 const checker = createChecker(join(projectRoot, 'tsconfig.json'), { forceUseTs: true })
+const rawArgs = process.argv.slice(2)
+const validateOnly = rawArgs.includes('--validate')
+const domainFilter = rawArgs.find((arg) => !arg.startsWith('--')) ?? null
 
 function readCatalog(filePath: string): CatalogEntry {
   const source = readFileSync(filePath, 'utf8')
@@ -150,9 +153,107 @@ function collectComponent(filePath: string): OutputComponent {
   }
 }
 
-const components = componentFiles
-  .map(collectComponent)
+function validateCatalog(entry: CatalogEntry, componentNames: Set<string>, file: string): string[] {
+  const errors: string[] = []
+
+  const requiredKeys: Array<keyof CatalogEntry> = [
+    'title',
+    'category',
+    'domain',
+    'tags',
+    'purpose',
+    'useWhen',
+    'avoidWhen',
+    'status',
+    'related',
+    'replaces',
+    'usedBy',
+  ]
+
+  for (const key of requiredKeys) {
+    if (!(key in entry)) {
+      errors.push(`Missing required field "${key}" in ${file}`)
+    }
+  }
+
+  const allowedCategories = new Set<CatalogCategory>([
+    'app',
+    'display',
+    'feedback',
+    'form',
+    'navigation',
+    'overlay',
+    'section',
+    'domain',
+  ])
+
+  if (!allowedCategories.has(entry.category)) {
+    errors.push(`Invalid category "${entry.category}" in ${file}`)
+  }
+
+  for (const related of entry.related) {
+    if (!componentNames.has(related)) {
+      errors.push(`Broken related reference: ${related} in ${file}`)
+    }
+  }
+
+  if (entry.replaces && !componentNames.has(entry.replaces)) {
+    errors.push(`Broken replaces reference: ${entry.replaces} in ${file}`)
+  }
+
+  for (const usedBy of entry.usedBy) {
+    if (!componentNames.has(usedBy) && !usedBy.endsWith('Page')) {
+      errors.push(`Broken usedBy reference: ${usedBy} in ${file}`)
+    }
+  }
+
+  return errors
+}
+
+const collected = componentFiles.map((filePath) => {
+  try {
+    return collectComponent(filePath)
+  } catch (error) {
+    return { error: (error as Error).message, file: relative(projectRoot, filePath) }
+  }
+})
+
+const componentNames = new Set(
+  collected.filter((item): item is OutputComponent => 'name' in item).map((item) => item.name),
+)
+
+const validationErrors = collected.flatMap((item) => {
+  if ('error' in item) {
+    return [item.error]
+  }
+
+  return validateCatalog(item.catalog, componentNames, item.file)
+})
+
+const validatedComponents = collected.filter((item): item is OutputComponent => {
+  if ('error' in item) {
+    return false
+  }
+
+  return validateCatalog(item.catalog, componentNames, item.file).length === 0
+})
+
+if (validationErrors.length > 0) {
+  console.log(validationErrors.join('\n'))
+  if (validateOnly) {
+    process.exit(1)
+  }
+}
+
+const components = validatedComponents
+  .filter((item) => (domainFilter ? item.catalog.domain === domainFilter : true))
   .sort((a, b) => b.name.localeCompare(a.name))
+
+if (validateOnly) {
+  console.log(`Validated ${collected.length} component files`)
+  process.exit(validationErrors.length === 0 ? 0 : 1)
+}
+
 const aggregate = {
   generated: new Date().toISOString(),
   version: '1.0.0',
