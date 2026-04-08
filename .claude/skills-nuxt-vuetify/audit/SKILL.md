@@ -1,8 +1,25 @@
 ---
 name: audit
-description: Placeholder scaffold for the Nuxt/Vuetify audit skill. Full implementation follows in later tasks.
+description: Audit Nuxt 4 + Vuetify 3 frontend structure, catalog health, and CSS quality without editing code.
 ---
 
 # Audit
 
-This skill is scaffolded during bootstrap so the plugin manifest resolves. Its full behavior is implemented in later tasks.
+## Severity
+
+- Critico - breaks core maintainability or architecture rules.
+- Atencao - convention drift that should be fixed soon.
+- Sugestao - non-blocking improvement.
+
+## Dimensions
+
+- Componentizacao
+- Arquitetura e SOLID
+- Convencoes Nuxt
+- Vuetify
+- Catalogo
+- CSS e SCSS
+
+## Output
+
+Produce a report with counts per severity and a concrete suggested next command.

@@ -1,8 +1,24 @@
 ---
 name: execute
-description: Placeholder scaffold for the Nuxt/Vuetify execute skill. Full implementation follows in later tasks.
+description: Execute an approved Nuxt/Vuetify implementation plan using dependency-aware parallel dispatch.
 ---
 
 # Execute
 
-This skill is scaffolded during bootstrap so the plugin manifest resolves. Its full behavior is implemented in later tasks.
+## Purpose
+
+Apply an approved /plan by dispatching independent files in parallel and serializing dependent groups.
+
+## Flow
+
+1. Parse the approved plan into ordered groups.
+2. Dispatch agents in parallel inside each group.
+3. Wait for the whole group to finish before starting dependent groups.
+4. Report failures with the exact file that stopped the flow.
+5. Suggest /catalog and /test after implementation.
+
+## Failure handling
+
+- If one agent fails, stop the dependent groups.
+- Nao tenta re-executar automaticamente.
+- Ask the user whether to fix manually or resume from the failed group.

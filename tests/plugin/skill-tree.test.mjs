@@ -45,3 +45,29 @@ test('think and plan skills explain catalog-aware design and execution topology'
   assert.match(plan, /## Grupos de Execucao/)
   assert.match(plan, /esperar aprovacao/)
 })
+
+test('execute, audit, and test skills document their guardrails', () => {
+  const files = [
+    '.claude/skills-nuxt-vuetify/execute/SKILL.md',
+    '.claude/skills-nuxt-vuetify/audit/SKILL.md',
+    '.claude/skills-nuxt-vuetify/audit/reference/quality-rules.md',
+    '.claude/skills-nuxt-vuetify/test/SKILL.md',
+    '.claude/skills-nuxt-vuetify/test/reference/test-conventions.md',
+  ]
+
+  for (const file of files) {
+    assert.equal(existsSync(resolve(root, file)), true, `${file} should exist`)
+  }
+
+  const execute = read('.claude/skills-nuxt-vuetify/execute/SKILL.md')
+  const audit = read('.claude/skills-nuxt-vuetify/audit/SKILL.md')
+  const qualityRules = read('.claude/skills-nuxt-vuetify/audit/reference/quality-rules.md')
+  const testSkill = read('.claude/skills-nuxt-vuetify/test/SKILL.md')
+  const testRules = read('.claude/skills-nuxt-vuetify/test/reference/test-conventions.md')
+
+  assert.match(execute, /Nao tenta re-executar automaticamente/)
+  assert.match(audit, /Critico/)
+  assert.match(qualityRules, /Vuetify/)
+  assert.match(testSkill, /data-testid/)
+  assert.match(testRules, /getByTestId/)
+})
